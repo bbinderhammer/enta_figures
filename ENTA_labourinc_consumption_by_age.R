@@ -245,7 +245,8 @@ p <- ggplot(d_long, aes(x = AGE, y = VALUE, colour = IND)) +
   # Title and axis labels
   labs(title = paste0("Labour income and consumption, ", country_names[country], " ", year),
        x = "Age",
-       y = "Euro per capita") +
+       y = "Euro per capita",
+       caption = "Source: ENTA dataset v2.0.0, doi:10.5281/zenodo.20360412") +
 
   # Clean, light styling with legend inside the plot
   theme_minimal(base_size = 18) +
@@ -256,7 +257,9 @@ p <- ggplot(d_long, aes(x = AGE, y = VALUE, colour = IND)) +
         legend.position.inside = c(0.05, 0.95),
         legend.justification = c("left", "top"),
         legend.background = element_rect(fill = "white", colour = NA),
-        axis.text.y   = element_text(hjust = 0.5, angle = 90, vjust = 0.5))
+        axis.text.y   = element_text(hjust = 0.5, angle = 90, vjust = 0.5),
+        plot.caption = element_text(hjust = 0, size = 11, colour = "grey50"),
+        plot.margin = margin(10, 10, 5, 10))
 
 # Show the graph on screen
 print(p)

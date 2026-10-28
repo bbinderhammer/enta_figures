@@ -20,7 +20,9 @@
 #   3. Interpolate crossing ages for one country
 #   4. Draw the annotated graph
 #
-# In RStudio: Session > Set Working Directory > To Source File Location
+# How to run it: open enta_figures.Rproj in RStudio, then this file, and
+# click "Source". The data are downloaded once into data/, the graph is
+# saved in figures/.
 ################################################################################
 
 ################################################################################
@@ -58,9 +60,12 @@ country_names <- c(AT = "Austria", DE = "Germany", ES = "Spain", FR = "France",
                    EE = "Estonia", IE = "Ireland", LU = "Luxembourg", CY = "Cyprus",
                    MT = "Malta")
 
-options(timeout = 600)
+# Folder for the PNG file, relative to the project folder. The graph is
+# saved only if the folder exists; otherwise it is only shown. Or give
+# another existing folder, e.g. outdir <- "C:/Users/me/Desktop".
+outdir <- "figures"
 
-message("Working directory: ", getwd())
+options(timeout = 600)
 
 ################################################################################
 # 2. Download data from Zenodo
@@ -71,17 +76,19 @@ message("Working directory: ", getwd())
 # version associated with that concept DOI.
 
 url  <- "https://zenodo.org/records/22550976/files/ENTA_nta.parquet?download=1"
-path <- "data/ENTA_nta.parquet"
+path <- file.path("data", "ENTA_nta.parquet")
 
 if (!file.exists(path)) {
-  dir.create("data", showWarnings = FALSE, recursive = TRUE)
+  dir.create(dirname(path), showWarnings = FALSE, recursive = TRUE)
   message("Downloading ENTA data from Zenodo...")
-  # Download straight to path; delete on failure.
+  # Download straight to path; delete on failure (download.file returns 0
+  # on success).
   ok <- tryCatch(
-    download.file(url, path, mode = "wb"),
-    error = function(e) { file.remove(path); FALSE }
+    download.file(url, path, mode = "wb") == 0,
+    error = function(e) FALSE
   )
-  if (!is.logical(ok) || !ok) {
+  if (!ok) {
+    if (file.exists(path)) file.remove(path)
     stop("Download failed")
   }
   message("Data saved to: ", path)
@@ -265,10 +272,11 @@ p <- ggplot(d_long, aes(x = AGE, y = VALUE, colour = IND)) +
 print(p)
 
 # Export the graph to PNG
-outdir <- "figures_percap"
-dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
-outpath <- file.path(outdir, paste0("yl_c_", country, "_", year, ".png"))
-ggsave(filename = outpath,
-       plot     = p, width = 12, height = 9, dpi = 300)
-
-message("Graph saved to: ", normalizePath(outpath, mustWork = FALSE))
+if (dir.exists(outdir)) {
+  outpath <- file.path(outdir, paste0("ENTA_labourinc_consumption_age_", country, "_", year, ".png"))
+  ggsave(filename = outpath, plot = p, width = 12, height = 9, dpi = 300)
+  message("Graph saved to: ", normalizePath(outpath))
+} else {
+  message("Graph not saved: folder ", outdir, " does not exist.",
+          "\n  Open enta_figures.Rproj first, or set outdir in section 1.")
+}

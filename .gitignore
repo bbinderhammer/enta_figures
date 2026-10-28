@@ -1,0 +1,13 @@
+# R / RStudio
+.Rproj.user/
+.Rhistory
+.RData
+
+# Downloaded data and generated figures (folders are kept via .gitkeep)
+data/*
+!data/.gitkeep
+figures/*
+!figures/.gitkeep
+
+# Written by Rscript when a plot is printed
+Rplots.pdf
